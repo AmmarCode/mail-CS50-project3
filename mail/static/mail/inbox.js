@@ -14,12 +14,16 @@ function compose_email() {
 
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
 
   // Clear out composition fields
   document.querySelector('#compose-recipients').value = '';
   document.querySelector('#compose-subject').value = '';
   document.querySelector('#compose-body').value = '';
+  
+  //Send email on submit
+  document.querySelector('#compose-form').onsubmit = send_email;
 }
 
 function load_mailbox(mailbox) {
@@ -30,4 +34,13 @@ function load_mailbox(mailbox) {
 
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+
+  fetch(`/emails/${mailbox}`, {
+    method: 'GET',
+  })
+    .then(response => response.json())
+    .then(emails => {
+      console.log(emails);
+      emails.forEach(email => view_emails(email, mailbox));
+    });
 }
