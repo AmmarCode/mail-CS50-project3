@@ -5,10 +5,10 @@
     <h2>{{ request.user.email }}</h2>
 
     <button class="btn btn-sm btn-outline-primary" id="inbox">Inbox</button>
-    <button class="btn btn-sm btn-outline-primary" id="compose">Compose</button>
-    <button class="btn btn-sm btn-outline-primary" id="sent">Sent</button>
-    <button class="btn btn-sm btn-outline-primary" id="archived">Archived</button>
-    <a class="btn btn-sm btn-outline-primary" href="{% url 'logout' %}">Log Out</a>
+    <button class="btn btn-sm btn-outline-success" id="compose">Compose</button>
+    <button class="btn btn-sm btn-outline-info" id="sent">Sent</button>
+    <button class="btn btn-sm btn-outline-secondary" id="archived">Archived</button>
+    <a class="btn btn-sm btn-outline-danger" href="{% url 'logout' %}">Log Out</a>
     <hr>
 
     <div id="emails-view">
@@ -60,7 +60,9 @@
                 <input class="form-control" id="compose-subject" placeholder="Subject">
             </div>
             <textarea class="form-control" id="compose-body" placeholder="Body"></textarea>
-            <input type="submit" class="btn btn-primary"/>
+            </br>
+            <button type="submit" class="btn btn-primary" >Submit</button>
+            
         </form>
     </div>
 {% endblock %}
