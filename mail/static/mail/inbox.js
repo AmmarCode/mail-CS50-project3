@@ -143,3 +143,100 @@ function view_emails(email, mailbox) {
   subject.addEventListener('click', () => view_email(email.id));
   timestamp.addEventListener('click', () => view_email(email.id));
 }
+
+function view_email(email_id) {
+
+  //show email view and hide other views
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'block';
+  document.querySelector('#compose-view').style.display - 'none';
+
+  //fetch email details
+  fetch(`/emails/${email_id}`, {
+    method: 'GET'
+  })
+    .then(response => response.json())
+    .then(email => {
+      //mark email as read
+      mark_as_read(email_id);
+      console.log(email);
+      //display email details 
+      document.querySelector('#email-view-sender').innerHTML = '<strong>From: </strong>' + email.sender;
+      document.querySelector('#email-view-recipient').innerHTML = '<strong>To:  </strong>' + email.recipients;
+      document.querySelector('#email-view-timestamp').innerHTML = '<strong>Date: </strong>' + email.timestamp;
+      document.querySelector('#email-view-subject').innerHTML = '<strong>Subject: </strong>' + email.subject;
+      document.querySelector('#email-view-body').innerHTML = email.body;
+
+      //display archive button matching to archive status
+      if (email.archived == true) {
+        document.querySelector('#change-archive-status').innerHTML = 'Unarchive';
+      } else {
+        document.querySelector('#change-archive-status').innerHTML = 'Archive';
+      }
+      //Change archive status by clicking on archive icon
+      document.getElementById('change-archive-status').addEventListener('click', () => change_archive_status(email.id, email.archived));
+      // Change read status by clicking on read icon
+      document.getElementById('reply-email-button').addEventListener('click', () => reply_to_email(email));
+    });
+
+  return false;
+}
+
+function change_archive_status(email_id, previousValue) {
+
+  //Change archive status to opposite of current status
+  const newValue = !previousValue;
+  console.log(`updating email as archived = ${newValue}`);
+  fetch(`emails/${email_id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      archived: newValue
+    })
+  })
+  load_mailbox('inbox');
+  window.location.reload();
+}
+
+function change_read_status(email_id, previousValue) {
+
+  //change read status to opposite of current status
+  const newValue = !previousValue;
+  console.log(`Changed email read status`);
+  fetch(`/emails/${email_id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      read: newValue
+    })
+  })
+  load_mailbox('inbox')
+}
+
+function mark_as_read(email_id) {
+
+  //mark email as read
+  console.log('Marking email as read');
+  fetch(`/emails/${email_id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      read: true
+    })
+  })
+}
+
+function reply_to_email(email) {
+
+  //Show compose view and hide other views
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'none';
+  document.querySelector('#compose-view').style.display = 'block';
+
+  //assign recipient to the sender of the initial email
+  document.querySelector('#compose-recipients').value = email.sender;
+  if (email.subject.indexOf('Re:') === -1) {
+    email.subject = 'Re: ' + email.subject;
+  }
+
+  //fill initial email details in the reply form
+  document.querySelector('#compose-subject').value = email.subject;
+  document.querySelector('#compose-body').value = `\n\nOn ${email.timestamp} ${email.sender} wrote:\n \n${email.body}`;
+}
