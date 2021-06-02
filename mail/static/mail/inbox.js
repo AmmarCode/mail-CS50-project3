@@ -44,3 +44,102 @@ function load_mailbox(mailbox) {
       emails.forEach(email => view_emails(email, mailbox));
     });
 }
+
+function send_email() {
+
+  //define variable to save compose-form values
+  const recipients = document.querySelector('#compose-recipients').value;
+  const subject = document.querySelector('#compose-subject').value;
+  const body = document.querySelector('#compose-body').value;
+  fetch('/emails', {
+    method: 'POST',
+    body: JSON.stringify({
+      recipients: recipients,
+      subject: subject,
+      body: body
+    })
+  })
+    .then(response => response.json())
+    .then(result => {
+      console.log(result)
+    });
+  localStorage.clear();
+  load_mailbox('sent');
+  return false;
+}
+
+function view_emails(email, mailbox) {
+
+  //create html to display emails 
+  const emailDiv = document.createElement('div');
+  emailDiv.id = 'email';
+  emailDiv.className = 'row';
+
+  // sender 
+  const sender = document.createElement('div');
+  sender.id = 'email-sender';
+  sender.className = 'col-lg-2';
+  console.log(`Mailbox: ${mailbox}`);
+  sender.innerHTML = email.sender;
+  emailDiv.append(sender);
+
+  //subject
+  const subject = document.createElement('div');
+  subject.id = 'email-subject';
+  subject.className = 'col';
+  subject.innerHTML = email.subject;
+  emailDiv.append(subject);
+
+  //archive-icon
+  console.log(mailbox);
+  if (mailbox !== 'sent') {
+    const button = document.createElement('img');
+    button.id = 'archive-icon';
+    button.src = 'static/mail/archive-icon12.png'
+    button.innerHTML = 'Archive';
+    emailDiv.append(button)
+    //change archive status by clicking on archive icon
+    button.addEventListener('click', () => change_archive_status(email.id, email.archived));
+  }
+
+  //read-icon
+  console.log(mailbox)
+  if (mailbox !== 'sent') {
+    const readButton = document.createElement('img');
+    readButton.id = 'read-icon';
+    if (email.read == true) {
+      readButton.src = 'static/mail/read-icon1.png';
+    } else {
+      readButton.src = 'static/mail/unread-icon.png';
+    }
+    readButton.innerHTML = 'Read';
+    emailDiv.append(readButton)
+    //change read status by clicking on read icon
+    readButton.addEventListener('click', () => change_read_status(email.id, email.read));
+  }
+
+  //timestamp
+  const timestamp = document.createElement('div');
+  timestamp.id = 'email-timestamp';
+  timestamp.className = 'col';
+  timestamp.innerHTML = email.timestamp;
+  emailDiv.append(timestamp);
+
+  //email-card
+  const emailCard = document.createElement('div')
+  emailCard.id = 'email-card';
+  if (email.read === false) {
+    emailCard.style.backgroundColor = 'white';
+  } else {
+    emailCard.style.backgroundColor = 'rgba(242,245,245,0.8)';;
+  }
+  emailCard.append(emailDiv);
+  document.querySelector('#emails-view').append(emailCard);
+
+
+
+  //display email by clicking on sender, subject, or timestamp
+  sender.addEventListener('click', () => view_email(email.id));
+  subject.addEventListener('click', () => view_email(email.id));
+  timestamp.addEventListener('click', () => view_email(email.id));
+}
