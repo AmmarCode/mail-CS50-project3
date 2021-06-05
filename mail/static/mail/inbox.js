@@ -64,6 +64,7 @@ function send_email() {
       console.log(result)
     });
   localStorage.clear();
+  window.location.reload();
   load_mailbox('sent');
   return false;
 }
@@ -75,13 +76,22 @@ function view_emails(email, mailbox) {
   emailDiv.id = 'email';
   emailDiv.className = 'row';
 
-  // sender 
+  // sender or recipient
   const sender = document.createElement('div');
+  const recipient = document.createElement('div');
+  recipient.id = 'email-recipient'
+  recipient.className = 'col-lg-2'
+  recipient.innerHTML = email.recipients;
   sender.id = 'email-sender';
   sender.className = 'col-lg-2';
   console.log(`Mailbox: ${mailbox}`);
   sender.innerHTML = email.sender;
-  emailDiv.append(sender);
+  if (mailbox === 'inbox' || mailbox === 'archive') {
+    emailDiv.append(sender);
+  } else {
+    emailDiv.append(recipient);
+  }
+  
 
   //subject
   const subject = document.createElement('div');
@@ -140,6 +150,7 @@ function view_emails(email, mailbox) {
 
   //display email by clicking on sender, subject, or timestamp
   sender.addEventListener('click', () => view_email(email.id));
+  recipient.addEventListener('click', () => view_email(email.id));
   subject.addEventListener('click', () => view_email(email.id));
   timestamp.addEventListener('click', () => view_email(email.id));
 }
@@ -207,6 +218,9 @@ function change_read_status(email_id, previousValue) {
     body: JSON.stringify({
       read: newValue
     })
+  .catch(error => {
+    console.log('Error:', error);
+  })
   })
   load_mailbox('inbox')
 }
