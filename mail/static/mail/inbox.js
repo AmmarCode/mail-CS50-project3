@@ -64,7 +64,6 @@ function send_email() {
       console.log(result)
     });
   localStorage.clear();
-  window.location.reload();
   load_mailbox('sent');
   return false;
 }
