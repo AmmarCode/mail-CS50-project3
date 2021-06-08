@@ -6,6 +6,9 @@ document.addEventListener('DOMContentLoaded', function () {
   document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
   document.querySelector('#compose').addEventListener('click', compose_email);
 
+  //Send email on submit of compose form
+  document.querySelector('#compose-form').onsubmit = send_email;
+
   // By default, load the inbox
   load_mailbox('inbox');
 });
@@ -14,15 +17,13 @@ function compose_email() {
 
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
 
   // Clear out composition fields
   document.querySelector('#compose-recipients').value = '';
   document.querySelector('#compose-subject').value = '';
   document.querySelector('#compose-body').value = '';
-
-  //Send email on submit
-  document.querySelector('#compose-form').onsubmit = send_email;
 }
 
 function load_mailbox(mailbox) {
@@ -62,9 +63,8 @@ function send_email() {
     .then(response => response.json())
     .then(result => {
       console.log(result)
-    });
-  localStorage.clear();
-  load_mailbox('sent');
+      load_mailbox('sent', result)
+    });  
   return false;
 }
 
@@ -91,7 +91,6 @@ function view_emails(email, mailbox) {
     emailDiv.append(recipient);
   }
   
-
   //subject
   const subject = document.createElement('div');
   subject.id = 'email-subject';
@@ -145,8 +144,6 @@ function view_emails(email, mailbox) {
   emailCard.append(emailDiv);
   document.querySelector('#emails-view').append(emailCard);
 
-
-
   //display email by clicking on sender, subject, or timestamp
   sender.addEventListener('click', () => view_email(email.id));
   recipient.addEventListener('click', () => view_email(email.id));
@@ -178,7 +175,7 @@ function view_email(email_id) {
       document.querySelector('#email-view-body').innerHTML = email.body;
 
       //display archive button matching to archive status
-      if (email.archived == true) {
+      if (email.archived === true) {
         document.querySelector('#change-archive-status').innerHTML = 'Unarchive';
       } else {
         document.querySelector('#change-archive-status').innerHTML = 'Archive';
@@ -203,6 +200,9 @@ function change_archive_status(email_id, previousValue) {
       archived: newValue
     })
   })
+  .catch(error => {
+    console.log("Error:", error);
+  });
   load_mailbox('inbox');
   window.location.reload();
 }
@@ -217,10 +217,10 @@ function change_read_status(email_id, previousValue) {
     body: JSON.stringify({
       read: newValue
     })
+  })
   .catch(error => {
-    console.log('Error:', error);
-  })
-  })
+    console.log("Error:", error);
+  });
   load_mailbox('inbox')
 }
 
